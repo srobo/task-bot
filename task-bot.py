@@ -53,7 +53,7 @@ def main() -> None:
             webhook_url,
             json={
                 "text": "*Task Status*",
-                "attachments": [{"text": "\n".join(messages)}],
+                "attachments": [{"text": message} for message in messages],
             },
         )
         response.raise_for_status()
