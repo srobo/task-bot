@@ -1,5 +1,5 @@
+import argparse
 import os
-import sys
 from datetime import datetime
 from math import floor
 
@@ -9,6 +9,12 @@ from github import Github, Milestone
 
 def as_percentage(a: float, b: float) -> int:
     return floor((a / b) * 100)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("repo", type=str)
+    return parser.parse_args()
 
 
 def process_milestone(milestone: Milestone) -> str:
@@ -33,8 +39,9 @@ def process_milestone(milestone: Milestone) -> str:
 
 
 def main() -> None:
+    args = parse_args()
     github = Github(os.environ.get("GITHUB_TOKEN"))
-    repo = github.get_repo(sys.argv[1])
+    repo = github.get_repo(args.repo)
     messages = [
         process_milestone(milestone) for milestone in repo.get_milestones(sort="due_on")
     ]
