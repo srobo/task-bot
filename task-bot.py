@@ -46,6 +46,8 @@ def main() -> None:
     messages = [
         process_milestone(milestone) for milestone in repo.get_milestones(sort="due_on")
     ]
+    if not messages:
+        return
     webhook_url = os.environ.get("SLACK_WEBHOOK_URL")
     if webhook_url:
         response = requests.post(
