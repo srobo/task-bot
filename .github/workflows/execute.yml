@@ -1,0 +1,23 @@
+name: Execute
+
+on:
+  schedule:
+    - cron:  '*/15 * * * *'
+
+env:
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+    - name: Run
+      run: ./task-bot.py srobo/tasks
