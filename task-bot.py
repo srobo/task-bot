@@ -23,7 +23,7 @@ def main() -> None:
         if milestone.due_on:
             duration = milestone.due_on - milestone.created_at
             remaining = milestone.due_on - now
-            time_used = round((remaining.days / duration.days) * 100)
+            time_used = floor((remaining.days / duration.days) * 100)
             segments += [
                 f":date: {milestone.due_on.date().isoformat()}",
                 f":alarm_clock: {time_used}% time used",
