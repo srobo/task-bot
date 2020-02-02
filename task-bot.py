@@ -6,20 +6,26 @@ import requests
 import os
 
 def main():
-    github = Github()
+    github = Github(os.environ.get('GITHUB_TOKEN'))
     repo = github.get_repo(sys.argv[1])
     messages = []
     now = datetime.now()
-    for milestone in repo.get_milestones():
-        percentage_complete = round((milestone.closed_issues / (milestone.open_issues + milestone.closed_issues)) * 100)
-        message = f"*{milestone.title}*: {percentage_complete}% complete."
+    for milestone in repo.get_milestones(sort='due_on'):
+        html_url = milestone._rawData['html_url']
+        segments = []
+        total_issues = milestone.open_issues + milestone.closed_issues
+        percentage_complete = round((milestone.closed_issues / total_issues) * 100)
+        segments.append(f":heavy_check_mark: {percentage_complete}% completed ({milestone.closed_issues}/{total_issues})")
         if milestone.due_on:
             duration = milestone.due_on - milestone.created_at
             remaining = milestone.due_on - now
             time_used = round((remaining.days / duration.days) * 100)
-            message += f" Due {milestone.due_on.date().isoformat()}. {remaining.days} days remaining. {time_used}% time used."
-        messages.append(message)
-    messages = sorted(messages)
+            segments += [
+                f":date: {milestone.due_on.date().isoformat()}",
+                f":alarm_clock: {time_used}% time used"
+            ]
+        merged_segments = "\n".join(["\t" + segment for segment in segments]) + "\n"
+        messages.append(f"<{html_url}|{milestone.title}>\n" + merged_segments)
     print("\n".join(messages))
     response = requests.post(
         os.environ['SLACK_WEBHOOK_URL'],
