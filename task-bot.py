@@ -22,22 +22,21 @@ def parse_args() -> argparse.Namespace:
 def process_milestone(milestone: Milestone) -> str:
     now = datetime.now()
     html_url = milestone._rawData["html_url"]
-    segments = []
+    detail_line = ""
     total_issues = milestone.open_issues + milestone.closed_issues
     percentage_complete = as_percentage(milestone.closed_issues, total_issues)
-    segments.append(
-        f":heavy_check_mark: {percentage_complete}% completed ({milestone.closed_issues}/{total_issues})"
-    )
     if milestone.due_on:
         duration = milestone.due_on - milestone.created_at
         remaining = milestone.due_on - now
         time_used = as_percentage(remaining.days, duration.days)
-        segments += [
-            f":date: {milestone.due_on.date().isoformat()}",
-            f":alarm_clock: {time_used}% time used",
+        detail_line += f":date: {milestone.due_on.date().isoformat()} - :alarm_clock: {time_used}% time used"
+
+    return "\n".join(
+        [
+            f"<{html_url}|{milestone.title}> - {percentage_complete}% completed :heavy_check_mark: ({milestone.closed_issues}/{total_issues})",
+            "\t" + detail_line,
         ]
-    merged_segments = "\n".join(["\t" + segment for segment in segments]) + "\n"
-    return f"<{html_url}|{milestone.title}>\n" + merged_segments
+    )
 
 
 def main() -> None:
