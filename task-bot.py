@@ -33,7 +33,7 @@ def process_milestone(milestone: Milestone) -> str:
 
     return "\n".join(
         [
-            f"<{html_url}|{milestone.title}> - {percentage_complete}% completed :heavy_check_mark: ({milestone.closed_issues}/{total_issues})",
+            f"<{html_url}|{milestone.title}> - {percentage_complete}% completed ({milestone.closed_issues}/{total_issues}) :hourglass_flowing_sand:",
             "\t" + detail_line,
         ]
     )
