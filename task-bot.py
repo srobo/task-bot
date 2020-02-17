@@ -28,7 +28,7 @@ def process_milestone(milestone: Milestone) -> str:
     if milestone.due_on:
         duration = milestone.due_on - milestone.created_at
         remaining = milestone.due_on - now
-        time_used = as_percentage(remaining.days, duration.days)
+        time_used = 100 - as_percentage(remaining.days, duration.days)
         detail_line += f":date: {milestone.due_on.date().isoformat()} - :alarm_clock: {time_used}% time used"
 
     return "\n".join(
