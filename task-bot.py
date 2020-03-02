@@ -28,8 +28,18 @@ def get_in_progress_label(repo: Repository) -> Optional[Label]:
     return None
 
 
+def get_blocked_label(repo: Repository) -> Optional[Label]:
+    for label in repo.get_labels():
+        if "blocked" in label.name.lower():
+            return label
+    return None
+
+
 def process_milestone(
-    repo: Repository, milestone: Milestone, in_progress_label: Optional[Label]
+    repo: Repository,
+    milestone: Milestone,
+    in_progress_label: Optional[Label],
+    blocked_label: Optional[Label],
 ) -> str:
     now = datetime.now()
     html_url = milestone._rawData["html_url"]
@@ -52,6 +62,13 @@ def process_milestone(
             status_line += (
                 f" - :hourglass_flowing_sand: {percentage_in_progress}% in progress"
             )
+    if blocked_label:
+        blocked_issues = list(
+            repo.get_issues(milestone=milestone, labels=[blocked_label], state="open")
+        )
+        if blocked_issues:
+            percentage_blocked = as_percentage(len(blocked_issues), total_issues)
+            status_line += f" - :octagonal_sign: {percentage_blocked}% blocked"
     detail_lines.append(status_line)
 
     if milestone.due_on:
@@ -76,8 +93,9 @@ def main() -> None:
     github = Github(os.environ.get("GITHUB_TOKEN"))
     repo = github.get_repo(args.repo)
     in_progress_label = get_in_progress_label(repo)
+    blocked_label = get_blocked_label(repo)
     messages = [
-        process_milestone(repo, milestone, in_progress_label)
+        process_milestone(repo, milestone, in_progress_label, blocked_label)
         for milestone in repo.get_milestones(sort="due_on")
     ]
     if not messages:
