@@ -12,6 +12,8 @@ from github.Label import Label
 
 
 def as_percentage(a: float, b: float) -> int:
+    if b == 0:
+        return 0
     return floor((a / b) * 100)
 
 
