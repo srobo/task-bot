@@ -4,9 +4,11 @@ import argparse
 import os
 from datetime import datetime
 from math import floor
+from typing import Optional
 
 import requests
-from github import Github, Milestone
+from github import Github, Milestone, Repository
+from github.Label import Label
 
 
 def as_percentage(a: float, b: float) -> int:
@@ -19,32 +21,64 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def process_milestone(milestone: Milestone) -> str:
+def get_in_progress_label(repo: Repository) -> Optional[Label]:
+    for label in repo.get_labels():
+        if "in progress" in label.name.lower():
+            return label
+    return None
+
+
+def process_milestone(
+    repo: Repository, milestone: Milestone, in_progress_label: Optional[Label]
+) -> str:
     now = datetime.now()
     html_url = milestone._rawData["html_url"]
-    detail_line = ""
     total_issues = milestone.open_issues + milestone.closed_issues
     percentage_complete = as_percentage(milestone.closed_issues, total_issues)
+
+    detail_lines = []
+
+    status_line = f":heavy_check_mark: {percentage_complete}% completed"
+    if in_progress_label:
+        in_progress_issues = list(
+            repo.get_issues(
+                milestone=milestone, labels=[in_progress_label], state="open"
+            )
+        )
+        if in_progress_issues:
+            percentage_in_progress = as_percentage(
+                len(in_progress_issues), total_issues
+            )
+            status_line += (
+                f" - :hourglass_flowing_sand: {percentage_in_progress}% in progress"
+            )
+    detail_lines.append(status_line)
+
     if milestone.due_on:
         duration = milestone.due_on - milestone.created_at
         remaining = milestone.due_on - now
         time_used = 100 - as_percentage(remaining.days, duration.days)
-        detail_line += f":date: {milestone.due_on.date().isoformat()} - :alarm_clock: {time_used}% time used"
+        detail_lines.append(
+            f":date: {milestone.due_on.date().isoformat()} - :alarm_clock: {time_used}% time used"
+        )
 
-    return "\n".join(
-        [
-            f"<{html_url}|{milestone.title}> - {percentage_complete}% completed ({milestone.closed_issues}/{total_issues}) :hourglass_flowing_sand:",
-            "\t" + detail_line,
-        ]
+    rendered_line = (
+        f"<{html_url}|{milestone.title}> - {milestone.closed_issues}/{total_issues}"
     )
+    for line in detail_lines:
+        rendered_line += f"\n\t{line}"
+
+    return rendered_line
 
 
 def main() -> None:
     args = parse_args()
     github = Github(os.environ.get("GITHUB_TOKEN"))
     repo = github.get_repo(args.repo)
+    in_progress_label = get_in_progress_label(repo)
     messages = [
-        process_milestone(milestone) for milestone in repo.get_milestones(sort="due_on")
+        process_milestone(repo, milestone, in_progress_label)
+        for milestone in repo.get_milestones(sort="due_on")
     ]
     if not messages:
         return
