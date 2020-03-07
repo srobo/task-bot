@@ -3,7 +3,7 @@ name: Execute
 on:
   schedule:
     - cron: '0 13 * * 3'
-    - cron: '0 13 * 4 *
+    - cron: '0 13 * 4 *'
 
 env:
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
