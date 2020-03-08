@@ -2,7 +2,8 @@ name: Execute
 
 on:
   schedule:
-    - cron:  '0 13 * * *'
+    - cron: '0 13 * * 3'  # Every wednesday
+    - cron: '0 13 * 4 *'  # Everyday in April
 
 env:
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
