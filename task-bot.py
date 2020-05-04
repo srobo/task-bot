@@ -103,15 +103,17 @@ def main() -> None:
     if not messages:
         return
     webhook_url = os.environ.get("SLACK_WEBHOOK_URL")
+    title = f"*Task Status for <{repo.html_url}|{repo.full_name}>*"
     if webhook_url:
         response = requests.post(
             webhook_url,
             json={
-                "text": "*Task Status*",
+                "text": title,
                 "attachments": [{"text": message} for message in messages],
             },
         )
         response.raise_for_status()
+    print(title)
     print("\n".join(messages))
 
 
