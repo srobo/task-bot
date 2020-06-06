@@ -7,8 +7,10 @@ from math import floor
 from typing import Optional
 
 import requests
-from github import Github, Milestone, Repository
+from github import Github
 from github.Label import Label
+from github.Milestone import Milestone
+from github.Repository import Repository
 
 
 def as_percentage(a: float, b: float) -> int:
@@ -44,7 +46,7 @@ def process_milestone(
     blocked_label: Optional[Label],
 ) -> str:
     now = datetime.now()
-    html_url = milestone._rawData["html_url"]
+    html_url = milestone._rawData["html_url"]  # type: ignore
     total_issues = milestone.open_issues + milestone.closed_issues
     percentage_complete = as_percentage(milestone.closed_issues, total_issues)
 
