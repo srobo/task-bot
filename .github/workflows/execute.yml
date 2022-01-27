@@ -2,7 +2,7 @@ name: Execute
 
 on:
   schedule:
-    - cron: '0 13 * 9-10 3'  # Every Wednesday in September, for kickstart
+    - cron: '0 13 * 1-4 3'  # Every Wednesday until the competition
 
 env:
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
