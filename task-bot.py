@@ -52,7 +52,7 @@ def process_milestone(
 
     detail_lines = []
 
-    status_line = f":white_tick: {percentage_complete}% completed"
+    status_line = f":white_check_mark: {percentage_complete}% completed"
     if in_progress_label:
         in_progress_issues = list(
             repo.get_issues(
