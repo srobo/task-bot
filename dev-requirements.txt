@@ -9,3 +9,4 @@ flake8-tuple
 mypy
 isort
 black
+types-requests

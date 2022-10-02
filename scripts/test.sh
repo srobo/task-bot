@@ -11,7 +11,7 @@ echo "> Running linter..."
 flake8 task-bot.py
 
 echo "> Running isort..."
-isort -rc -c task-bot.py
+isort -c task-bot.py
 
 echo "> Running type checker..."
 mypy task-bot.py
